@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Tareas</title>
+</h:head>
+
+<h:body>
+
+<h:form id="form">
+
+    <p:messages autoUpdate="true" closable="true"/>
+
+    <p:commandButton value="Nueva tarea"
+                     action="#{taskBean.nuevo}"
+                     update=":dlgForm"
+                     oncomplete="PF('dlg').show()"/>
+
+    <br/><br/>
+
+    <p:dataTable id="tablaTasks" 
+    			 value="#{taskBean.tasks}"
+                 var="t"
+                 selection="#{taskBean.taskSeleccionada}"
+                 rowKey="#{t.id}"
+                 selectionMode="single"
+                 paginator="true"
+                 rows="10">
+
+		<p:ajax event="rowSelect"
+			        update=":form"
+			        listener="#{taskBean.onRowSelect}"/>
+			        
+        <p:column headerText="Título">
+            #{t.title}
+        </p:column>
+
+        <p:column headerText="Fecha Límite">
+            #{t.dueDate}
+        </p:column>
+
+        <p:column headerText="Completada">
+            <p:selectBooleanCheckbox value="#{t.completed}" disabled="true"/>
+        </p:column>
+
+        <p:column headerText="Acciones">
+			<p:commandButton value="Editar"
+                 icon="pi pi-pencil"
+                 action="#{taskBean.editar}"
+                 process="@this"
+                 update=":dlgForm"
+                 oncomplete="PF('dlg').show()"
+                 disabled="#{t ne taskBean.taskSeleccionada}"/>
+		    <p:commandButton value="Eliminar"
+		                     icon="pi pi-trash"
+		                     process="@this"
+		                     update=":form:tablaTasks"
+		                     action="#{taskBean.eliminar}"
+		                     disabled="#{t ne taskBean.taskSeleccionada}">
+		    </p:commandButton>
+        </p:column>
+
+    </p:dataTable>
+
+</h:form>
+
+<p:dialog widgetVar="dlg" header="Tarea" modal="true">
+
+    <h:form id="dlgForm">
+
+        <p:panelGrid columns="2">
+
+            <p:outputLabel value="Título"/>
+            <p:inputText value="#{taskBean.taskSeleccionada.title}" required="true"
+             				requiredMessage="El título es obligatorio"/>
+
+            <p:outputLabel value="Descripción"/>
+            <p:inputTextarea value="#{taskBean.taskSeleccionada.description}"/>
+
+            <p:outputLabel value="Fecha límite"/>
+            <p:calendar value="#{taskBean.taskSeleccionada.dueDate}"
+	            pattern="yyyy-MM-dd"
+	            navigator="true"
+	            showButtonPanel="true"
+	            required="true"
+               	requiredMessage="Seleccione una fecha"
+	            />
+                          
+            <p:outputLabel value="Completada"/>
+            <p:selectBooleanCheckbox value="#{taskBean.taskSeleccionada.completed}"/>
+
+        </p:panelGrid>
+
+        <p:commandButton value="Guardar"
+                         action="#{taskBean.guardar}"
+                         update=":form"
+                         oncomplete="PF('dlg').hide()"/>
+
+    </h:form>
+
+</p:dialog>
+
+</h:body>
+</html>
